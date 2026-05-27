@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Richard Segi — Game Review Consultant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0a0a0c;
+      --surface:   #111117;
+      --border:    #1e1e28;
+      --accent:    #c8f135;
+      --accent2:   #3bffc8;
+      --text:      #e8e8ec;
+      --muted:     #6b6b7a;
+      --display:   'Bebas Neue', sans-serif;
+      --body:      'DM Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.35;
+    }
+
+    /* ── GRID LINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 5vw;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,12,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 5vw 8vh;
+      z-index: 1;
+    }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 1.2rem;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(5rem, 14vw, 14rem);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .hero h1 span {
+      color: var(--accent);
+      display: block;
+    }
+
+    .hero-sub {
+      margin-top: 2.5rem;
+      max-width: 520px;
+      font-size: 1rem;
+      color: var(--muted);
+      border-left: 2px solid var(--accent);
+      padding-left: 1.2rem;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .hero-cta {
+      margin-top: 2.8rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0c;
+      font-weight: 500;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* decorative number */
+    .hero-number {
+      position: absolute;
+      right: 5vw;
+      bottom: 8vh;
+      font-family: var(--display);
+      font-size: clamp(8rem, 20vw, 22rem);
+      color: rgba(255,255,255,0.02);
+      line-height: 1;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ── SERVICES ── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .services {
+      padding: 10vh 5vw;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      max-width: 80px;
+    }
+
+    .services-intro {
+      max-width: 680px;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.8;
+      margin-bottom: 5rem;
+    }
+
+    .services-intro strong {
+      color: var(--accent2);
+      font-weight: 500;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .card {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      transition: background 0.25s;
+    }
+
+    .card:hover { background: #15151e; }
+
+    .card-icon {
+      font-size: 1.6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .card h3 {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── ABOUT STRIP ── */
+    .about-strip {
+      border-top: 1px solid var(--border);
+      padding: 8vh 5vw;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (max-width: 700px) {
+      .about-strip { grid-template-columns: 1fr; }
+    }
+
+    .about-strip h2 {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .about-strip h2 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .about-strip p {
+      font-size: 0.93rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .about-strip p + p { margin-top: 1rem; }
+
+    /* ── CONTACT ── */
+    .contact {
+      border-top: 1px solid var(--border);
+      padding: 10vh 5vw;
+    }
+
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 700px) {
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    .contact h2 {
+      font-family: var(--display);
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.95;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .contact h2 span { color: var(--accent); }
+
+    .contact-desc {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .contact-item .label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+
+    .contact-item .value {
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .contact-item a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .contact-item a:hover { color: var(--accent); }
+
+    /* form */
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 0.9rem;
+      padding: 0.85rem 1rem;
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group textarea { min-height: 120px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 5vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    footer .accent { color: var(--accent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* scrolled-in elements */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">Richard Segi</span>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-tag">// Brisbane, Australia — Available for Projects</p>
+    <h1>Richard<span>Segi.</span></h1>
+    <p class="hero-sub">
+      Independent game review consultant delivering honest, experienced critique — 
+      helping studios, publishers, and platforms make smarter creative decisions.
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary">Work with me</a>
+      <a href="#services" class="btn btn-ghost">View services</a>
+    </div>
+    <div class="hero-number" aria-hidden="true">01</div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <p class="section-label">Services</p>
+    <p class="services-intro reveal">
+      I offer <strong>independent, seasoned perspectives</strong> on games across all genres and platforms — 
+      from narrative design and gameplay mechanics to market positioning and player experience. 
+      Whether you're a developer seeking pre-launch feedback, a publisher evaluating titles, 
+      or a platform curating content, I bring clarity and candour to every engagement.
+    </p>
+    <div class="cards reveal">
+      <div class="card">
+        <div class="card-icon">🎮</div>
+        <h3>Pre-Launch Review</h3>
+        <p>In-depth critique of builds before release — covering mechanics, pacing, narrative, and player experience. Identify issues before they become reviews.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Market Positioning</h3>
+        <p>Comparative analysis of your title against the current landscape. Understand where you stand, who you're competing with, and how to differentiate.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">✍️</div>
+        <h3>Editorial Consulting</h3>
+        <p>Freelance review writing, editorial strategy, and content consulting for gaming publications, blogs, and platform storefronts.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Audience Insights</h3>
+        <p>Honest assessments from an experienced player's perspective — translating what real gamers think into actionable development or marketing decisions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-strip" id="about">
+    <div class="reveal">
+      <h2>Experience<br/>you can<br/><em>trust.</em></h2>
+    </div>
+    <div class="reveal">
+      <p>
+        Based in Brisbane, Australia, I've spent decades immersed in gaming culture — playing, analysing, 
+        and articulating what makes a game work and what doesn't. My background spans genres from indie 
+        darlings to AAA blockbusters.
+      </p>
+      <p>
+        I work with studios, publishers, and media outlets who need someone who cuts through the noise 
+        and tells it straight. No hype cycles. No score inflation. Just genuine, useful feedback 
+        delivered professionally and on time.
+      </p>
+      <p style="margin-top:2rem;">
+        <a href="#contact" class="btn btn-ghost">Let's talk →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <p class="section-label">Contact</p>
+    <div class="contact-inner">
+      <div class="reveal">
+        <h2>Start a<br/><span>project.</span></h2>
+        <p class="contact-desc">
+          Ready to get an honest take on your game or content? 
+          Reach out and let's discuss how I can help.
+        </p>
+        <div class="contact-details">
+          <div class="contact-item">
+            <span class="label">Location</span>
+            <span class="value">Brisbane, Queensland, Australia</span>
+          </div>
+          <div class="contact-item">
+            <span class="label">Email</span>
+            <span class="value"><a href="mailto:richard@richardsegi.com">richard@richardsegi.com</a></span>
+          </div>
+          <div class="contact-item">
+            <span class="label">Availability</span>
+            <span class="value">Open to new engagements</span>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" placeholder="Jane Smith" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="jane@studio.com" />
+        </div>
+        <div class="form-group">
+          <label for="project">Project Brief</label>
+          <textarea id="project" placeholder="Tell me about your game, platform, or project..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:fit-content;" onclick="alert('Message sent! I\'ll be in touch soon.')">
+          Send Message
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span class="accent">Richard Segi</span> — Brisbane, Australia</p>
+    <p>Game Review Consultant</p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+  </script>
+
+</body>
+</html>
